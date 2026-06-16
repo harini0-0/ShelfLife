@@ -1,6 +1,7 @@
 .my-shelf,
 .shopping-list,
-.add-item, .my-recipes {
+.add-item,
+.my-recipes {
   background-color: rgb(255, 255, 255);
   border-radius: 12px;
   border-style: solid;
@@ -15,6 +16,7 @@
 }
 
 .shopping-list,
-.add-itme, .my-recipes {
+.add-item,
+.my-recipes {
   min-height: 250px;
 }

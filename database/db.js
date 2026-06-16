@@ -15,6 +15,4 @@ await client.connect();
 
 console.log("Connected to MongoDB");
 
-const db = client.db("shelflife");
-
-export const shelfCollection = db.collection("shelf");
+export const db = client.db("shelflife");

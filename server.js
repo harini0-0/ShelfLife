@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 
+import historyRoutes from "./routes/history.js";
 import recipeRoutes from "./routes/recipes.js";
 import shelfRoutes from "./routes/shelf.js";
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use("/api/shelf", shelfRoutes);
 app.use("/api/recipes", recipeRoutes);
+app.use("/api/history", historyRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

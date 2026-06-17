@@ -10,6 +10,7 @@
     "lint:fix": "eslint . --fix",
     "serve": "http-server -c-1 -o",
     "dev": "reload -b -d .",
+    "seed": "node database/seed.js",
     "start": "node server.js",
     "start:nodemon": "nodemon server.js",
     "mongo": "mongosh",

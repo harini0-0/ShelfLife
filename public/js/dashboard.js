@@ -1,3 +1,9 @@
+import {
+  renderCategoryChart,
+  refreshSavingsChart,
+  refreshWasteMap,
+} from "./insights.js";
+
 let editingItemId = null;
 let allShelfItems = [];
 let shelfSort = { column: null, direction: null };
@@ -62,6 +68,21 @@ const QUANTITY_UNIT_GROUPS = [
 
 const DEFAULT_QUANTITY_UNIT = "item";
 
+const FOOD_CATEGORIES = [
+  "Produce",
+  "Dairy & Eggs",
+  "Meat & Seafood",
+  "Grains & Bakery",
+  "Pantry & Canned",
+  "Frozen",
+  "Beverages",
+  "Snacks",
+  "Condiments & Sauces",
+  "Other",
+];
+
+const DEFAULT_CATEGORY = "Uncategorized";
+
 function escapeHtml(text) {
   if (!text) {
     return "";
@@ -91,6 +112,25 @@ function renderQuantityUnitOptions(selectedUnit = DEFAULT_QUANTITY_UNIT) {
       </optgroup>
     `
   ).join("");
+}
+
+function renderCategoryOptions(selected = "") {
+  const categories = [...FOOD_CATEGORIES];
+
+  // Preserve a legacy/unknown value so editing an old item doesn't silently
+  // re-categorize it.
+  if (selected && !categories.includes(selected)) {
+    categories.unshift(selected);
+  }
+
+  return categories
+    .map(
+      (category) =>
+        `<option value="${escapeHtml(category)}"${
+          category === selected ? " selected" : ""
+        }>${escapeHtml(category)}</option>`
+    )
+    .join("");
 }
 
 function formatQuantity(food) {
@@ -204,6 +244,8 @@ function getShelfSortValue(food, column) {
     }
     case "food":
       return (food.name || "").toLowerCase();
+    case "category":
+      return (food.category || DEFAULT_CATEGORY).toLowerCase();
     case "quantity":
       return food.quantity === null ||
         food.quantity === undefined ||
@@ -288,6 +330,7 @@ function getShelfSearchText(food) {
   return [
     formatCostLostPerDay(food),
     food.name,
+    food.category || DEFAULT_CATEGORY,
     formatQuantity(food),
     formatCost(food.cost),
     food.expirationDate,
@@ -349,7 +392,7 @@ function renderShelfTable() {
   if (visibleShelf.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="8" class="text-center text-muted py-4">
+        <td colspan="9" class="text-center text-muted py-4">
           No items match your search.
         </td>
       </tr>
@@ -420,6 +463,7 @@ function getShelfItemPayload({
   quantity,
   quantityUnit,
   cost,
+  category,
 }) {
   return {
     name,
@@ -428,6 +472,7 @@ function getShelfItemPayload({
     quantity: parseQuantityValue(quantity),
     quantityUnit: quantityUnit || DEFAULT_QUANTITY_UNIT,
     cost: parseCostValue(cost),
+    category: category || DEFAULT_CATEGORY,
   };
 }
 
@@ -469,6 +514,11 @@ function renderShelfRow(food, index) {
             class="form-control form-control-sm inline-edit-name"
             value="${escapeHtml(food.name)}"
           />
+        </td>
+        <td>
+          <select class="form-select form-select-sm inline-edit-category">
+            ${renderCategoryOptions(food.category || "")}
+          </select>
         </td>
         <td>${renderQuantityFields(food)}</td>
         <td>
@@ -519,6 +569,7 @@ function renderShelfRow(food, index) {
       <td>${index + 1}</td>
       <td>${formatCostLostPerDay(food)}</td>
       <td>${escapeHtml(food.name)}</td>
+      <td>${escapeHtml(food.category || DEFAULT_CATEGORY)}</td>
       <td>${formatQuantity(food)}</td>
       <td>${formatCost(food.cost)}</td>
       <td>${food.storedDate || ""}</td>
@@ -547,6 +598,7 @@ function readShelfFieldsFromRow(row) {
     quantity: row.querySelector(".inline-edit-quantity").value,
     quantityUnit: row.querySelector(".inline-edit-unit").value,
     cost: row.querySelector(".inline-edit-cost").value,
+    category: row.querySelector(".inline-edit-category").value,
   });
 }
 
@@ -555,28 +607,7 @@ async function loadShelfData() {
     const response = await fetch("/api/shelf");
     allShelfItems = await response.json();
     renderShelfTable();
-  } catch (error) {
-    console.error("Failed to load shelf data:", error);
-  }
-}
-
-async function loadPreppedMeals() {
-  try {
-    const response = await fetch("/data/shelfdata.json");
-    const shelfData = await response.json();
-    const tableBody = document.getElementById("shelf-table-body");
-
-    tableBody.innerHTML = shelfData
-      .map(
-        (food, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${food.name}</td>
-            <td>${food.expirationDate}</td>
-            </tr>
-        `
-      )
-      .join("");
+    renderCategoryChart(allShelfItems);
   } catch (error) {
     console.error("Failed to load shelf data:", error);
   }
@@ -584,11 +615,13 @@ async function loadPreppedMeals() {
 
 const addItemForm = document.getElementById("add-item-form");
 const quantityUnitInput = document.getElementById("quantity-unit-input");
+const categoryInput = document.getElementById("category-input");
 const shelfSearchInput = document.getElementById("shelf-search-input");
 const shelfClearSearchBtn = document.getElementById("shelf-clear-search-btn");
 const shelfClearFiltersBtn = document.getElementById("shelf-clear-filters-btn");
 
 quantityUnitInput.innerHTML = renderQuantityUnitOptions();
+categoryInput.innerHTML = renderCategoryOptions();
 
 shelfSearchInput.addEventListener("input", renderShelfTable);
 document.querySelectorAll(".shelf-sort-btn").forEach((btn) => {
@@ -659,6 +692,8 @@ document.addEventListener("click", async (event) => {
   }
 
   await loadShelfData();
+  await refreshSavingsChart();
+  await refreshWasteMap();
 });
 
 addItemForm.addEventListener("submit", async (event) => {
@@ -671,6 +706,7 @@ addItemForm.addEventListener("submit", async (event) => {
     quantity: document.getElementById("quantity-input").value,
     quantityUnit: document.getElementById("quantity-unit-input").value,
     cost: document.getElementById("cost-input").value,
+    category: categoryInput.value,
   });
 
   try {
@@ -687,6 +723,7 @@ addItemForm.addEventListener("submit", async (event) => {
     }
     addItemForm.reset();
     quantityUnitInput.value = DEFAULT_QUANTITY_UNIT;
+    categoryInput.value = FOOD_CATEGORIES[0];
     await loadShelfData();
   } catch (error) {
     console.error("Failed to submit form:", error);
@@ -694,3 +731,5 @@ addItemForm.addEventListener("submit", async (event) => {
 });
 
 loadShelfData();
+refreshSavingsChart();
+refreshWasteMap();

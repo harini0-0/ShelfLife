@@ -74,6 +74,47 @@ body {
   min-height: 250px;
 }
 
+/* Insights card */
+.insights-card {
+  background-color: var(--sl-surface);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius);
+  box-shadow: var(--sl-shadow);
+  padding: 1.25rem 1.5rem;
+}
+
+.insights-card h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--sl-text);
+  margin-bottom: 1rem;
+}
+
+.insights-subtitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sl-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.insights-chart-wrap {
+  position: relative;
+  height: 300px;
+}
+
+.category-chart-empty,
+.waste-map-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 /* Headings inside panels */
 .my-shelf h3,
 .add-item h2,

@@ -1,0 +1,378 @@
+import { db } from "./db.js";
+
+// Dates are generated relative to "today" so the shelf always has a realistic
+// mix of fresh, expiring-soon, and expired items regardless of when this runs.
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+// Returns a YYYY-MM-DD string offset from today (negative = past).
+function dateOffset(days) {
+  const date = new Date(today);
+  date.setDate(date.getDate() + days);
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+// Returns a Date offset from today, for history removal timestamps.
+function timestampDaysAgo(days) {
+  const date = new Date(today);
+  date.setDate(date.getDate() - days);
+  date.setHours(9, 0, 0, 0);
+  return date;
+}
+
+const shelfItems = [
+  // Produce — a couple expiring soon
+  {
+    name: "Baby spinach",
+    category: "Produce",
+    quantity: 1,
+    quantityUnit: "bag",
+    cost: 3.49,
+    storedDate: dateOffset(-3),
+    expirationDate: dateOffset(2),
+  },
+  {
+    name: "Bananas",
+    category: "Produce",
+    quantity: 6,
+    quantityUnit: "item",
+    cost: 1.8,
+    storedDate: dateOffset(-2),
+    expirationDate: dateOffset(4),
+  },
+  {
+    name: "Carrots",
+    category: "Produce",
+    quantity: 2,
+    quantityUnit: "lb",
+    cost: 2.25,
+    storedDate: dateOffset(-4),
+    expirationDate: dateOffset(13),
+  },
+  // Dairy & Eggs
+  {
+    name: "Whole milk",
+    category: "Dairy & Eggs",
+    quantity: 1,
+    quantityUnit: "gallon",
+    cost: 4.29,
+    storedDate: dateOffset(-5),
+    expirationDate: dateOffset(3),
+  },
+  {
+    name: "Greek yogurt",
+    category: "Dairy & Eggs",
+    quantity: 4,
+    quantityUnit: "container",
+    cost: 5.0,
+    storedDate: dateOffset(-2),
+    expirationDate: dateOffset(10),
+  },
+  {
+    name: "Large eggs",
+    category: "Dairy & Eggs",
+    quantity: 12,
+    quantityUnit: "item",
+    cost: 3.99,
+    storedDate: dateOffset(-6),
+    expirationDate: dateOffset(21),
+  },
+  // Meat & Seafood — one expiring tomorrow, one already expired
+  {
+    name: "Chicken breast",
+    category: "Meat & Seafood",
+    quantity: 1.5,
+    quantityUnit: "lb",
+    cost: 8.49,
+    storedDate: dateOffset(-2),
+    expirationDate: dateOffset(1),
+  },
+  {
+    name: "Salmon fillet",
+    category: "Meat & Seafood",
+    quantity: 2,
+    quantityUnit: "fillet",
+    cost: 12.99,
+    storedDate: dateOffset(-5),
+    expirationDate: dateOffset(-1),
+  },
+  // Grains & Bakery
+  {
+    name: "Sourdough loaf",
+    category: "Grains & Bakery",
+    quantity: 1,
+    quantityUnit: "item",
+    cost: 4.5,
+    storedDate: dateOffset(-1),
+    expirationDate: dateOffset(5),
+  },
+  {
+    name: "Plain bagels",
+    category: "Grains & Bakery",
+    quantity: 6,
+    quantityUnit: "item",
+    cost: 3.29,
+    storedDate: dateOffset(-2),
+    expirationDate: dateOffset(8),
+  },
+  // Pantry & Canned — long shelf life
+  {
+    name: "Canned black beans",
+    category: "Pantry & Canned",
+    quantity: 3,
+    quantityUnit: "can",
+    cost: 2.7,
+    storedDate: dateOffset(-20),
+    expirationDate: dateOffset(540),
+  },
+  {
+    name: "Spaghetti",
+    category: "Pantry & Canned",
+    quantity: 2,
+    quantityUnit: "box",
+    cost: 2.5,
+    storedDate: dateOffset(-30),
+    expirationDate: dateOffset(400),
+  },
+  // Frozen
+  {
+    name: "Frozen peas",
+    category: "Frozen",
+    quantity: 1,
+    quantityUnit: "bag",
+    cost: 2.19,
+    storedDate: dateOffset(-15),
+    expirationDate: dateOffset(220),
+  },
+  // Beverages
+  {
+    name: "Orange juice",
+    category: "Beverages",
+    quantity: 1,
+    quantityUnit: "carton",
+    cost: 3.75,
+    storedDate: dateOffset(-3),
+    expirationDate: dateOffset(6),
+  },
+  // Condiments & Sauces
+  {
+    name: "Ketchup",
+    category: "Condiments & Sauces",
+    quantity: 1,
+    quantityUnit: "bottle",
+    cost: 2.99,
+    storedDate: dateOffset(-25),
+    expirationDate: dateOffset(150),
+  },
+];
+
+// Each history entry mirrors what the DELETE route writes. Waste rates are
+// deliberately uneven across categories so the waste map is interesting:
+// Produce and Meat are wasteful, Pantry/Frozen rarely are.
+const removed = [
+  // Produce — high waste rate, several thrown out
+  {
+    name: "Romaine lettuce",
+    category: "Produce",
+    cost: 2.99,
+    outcome: "wasted",
+    daysAgo: 3,
+  },
+  {
+    name: "Strawberries",
+    category: "Produce",
+    cost: 4.49,
+    outcome: "wasted",
+    daysAgo: 6,
+  },
+  {
+    name: "Roma tomatoes",
+    category: "Produce",
+    cost: 3.2,
+    outcome: "wasted",
+    daysAgo: 11,
+  },
+  {
+    name: "Apples",
+    category: "Produce",
+    cost: 4.0,
+    outcome: "saved",
+    daysAgo: 8,
+  },
+  {
+    name: "Bell peppers",
+    category: "Produce",
+    cost: 3.5,
+    outcome: "saved",
+    daysAgo: 14,
+  },
+
+  // Meat & Seafood — fewer items but expensive losses
+  {
+    name: "Ground beef",
+    category: "Meat & Seafood",
+    cost: 9.99,
+    outcome: "wasted",
+    daysAgo: 5,
+  },
+  {
+    name: "Shrimp",
+    category: "Meat & Seafood",
+    cost: 13.5,
+    outcome: "wasted",
+    daysAgo: 18,
+  },
+  {
+    name: "Pork chops",
+    category: "Meat & Seafood",
+    cost: 7.25,
+    outcome: "saved",
+    daysAgo: 9,
+  },
+
+  // Dairy & Eggs — moderate
+  {
+    name: "Sour cream",
+    category: "Dairy & Eggs",
+    cost: 2.49,
+    outcome: "wasted",
+    daysAgo: 7,
+  },
+  {
+    name: "Cheddar cheese",
+    category: "Dairy & Eggs",
+    cost: 5.99,
+    outcome: "saved",
+    daysAgo: 4,
+  },
+  {
+    name: "Butter",
+    category: "Dairy & Eggs",
+    cost: 4.29,
+    outcome: "saved",
+    daysAgo: 12,
+  },
+  {
+    name: "Cottage cheese",
+    category: "Dairy & Eggs",
+    cost: 3.19,
+    outcome: "saved",
+    daysAgo: 20,
+  },
+
+  // Grains & Bakery — moderate
+  {
+    name: "Hamburger buns",
+    category: "Grains & Bakery",
+    cost: 2.99,
+    outcome: "wasted",
+    daysAgo: 10,
+  },
+  {
+    name: "Tortillas",
+    category: "Grains & Bakery",
+    cost: 3.49,
+    outcome: "saved",
+    daysAgo: 6,
+  },
+  {
+    name: "White rice",
+    category: "Grains & Bakery",
+    cost: 5.5,
+    outcome: "saved",
+    daysAgo: 22,
+  },
+
+  // Pantry & Canned — used in time, no waste
+  {
+    name: "Canned corn",
+    category: "Pantry & Canned",
+    cost: 1.29,
+    outcome: "saved",
+    daysAgo: 15,
+  },
+  {
+    name: "Peanut butter",
+    category: "Pantry & Canned",
+    cost: 4.99,
+    outcome: "saved",
+    daysAgo: 25,
+  },
+
+  // Frozen — no waste
+  {
+    name: "Frozen blueberries",
+    category: "Frozen",
+    cost: 4.49,
+    outcome: "saved",
+    daysAgo: 17,
+  },
+
+  // Beverages — one lapsed
+  {
+    name: "Almond milk",
+    category: "Beverages",
+    cost: 3.29,
+    outcome: "wasted",
+    daysAgo: 13,
+  },
+  {
+    name: "Iced tea",
+    category: "Beverages",
+    cost: 2.79,
+    outcome: "saved",
+    daysAgo: 19,
+  },
+];
+
+function buildHistoryRecord(entry) {
+  // Wasted items lapsed before removal; saved items still had time left.
+  const expirationDate =
+    entry.outcome === "wasted"
+      ? dateOffset(-(entry.daysAgo + 2))
+      : dateOffset(-(entry.daysAgo - 5));
+
+  return {
+    name: entry.name,
+    storedDate: dateOffset(-(entry.daysAgo + 14)),
+    expirationDate,
+    quantity: 1,
+    quantityUnit: "item",
+    cost: entry.cost,
+    category: entry.category,
+    value: entry.cost,
+    outcome: entry.outcome,
+    removedDate: timestampDaysAgo(entry.daysAgo),
+  };
+}
+
+async function seed() {
+  const shelfCollection = db.collection("shelf");
+  const historyCollection = db.collection("history");
+
+  const clearedShelf = await shelfCollection.deleteMany({});
+  const clearedHistory = await historyCollection.deleteMany({});
+  console.log(
+    `Cleared ${clearedShelf.deletedCount} shelf and ${clearedHistory.deletedCount} history records.`
+  );
+
+  const shelfResult = await shelfCollection.insertMany(shelfItems);
+  const historyResult = await historyCollection.insertMany(
+    removed.map(buildHistoryRecord)
+  );
+
+  console.log(
+    `Inserted ${shelfResult.insertedCount} shelf items and ${historyResult.insertedCount} history records.`
+  );
+}
+
+seed()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error("Seeding failed:", error);
+    process.exit(1);
+  });

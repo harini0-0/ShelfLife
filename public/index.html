@@ -37,6 +37,48 @@
     </nav>
     <main>
       <div class="container mt-5">
+        <!-- Insights -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="insights-card">
+              <h2>Insights</h2>
+              <div class="row g-4">
+                <div class="col-lg-3">
+                  <h3 class="insights-subtitle">Saved vs lost</h3>
+                  <div class="insights-chart-wrap">
+                    <canvas id="savings-bar-chart"></canvas>
+                  </div>
+                </div>
+                <div class="col-lg-5">
+                  <h3 class="insights-subtitle">Waste map by category</h3>
+                  <div class="insights-chart-wrap">
+                    <canvas id="waste-map-chart"></canvas>
+                    <p
+                      class="text-muted small mb-0 waste-map-empty d-none"
+                      id="waste-map-empty"
+                    >
+                      No removed items yet. Waste insights appear once you start
+                      clearing items from your shelf.
+                    </p>
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <h3 class="insights-subtitle">Items in shelf by category</h3>
+                  <div class="insights-chart-wrap">
+                    <canvas id="category-chart"></canvas>
+                    <p
+                      class="text-muted small mb-0 category-chart-empty d-none"
+                      id="category-chart-empty"
+                    >
+                      No items on your shelf yet.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Top Shelf Section -->
         <div class="row">
           <div class="col-12">
@@ -112,6 +154,19 @@
                           aria-label="Sort by food"
                         >
                           Food
+                          <span class="shelf-sort-arrow" aria-hidden="true"
+                            >&#8597;</span
+                          >
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="shelf-sort-btn"
+                          data-sort="category"
+                          aria-label="Sort by category"
+                        >
+                          Category
                           <span class="shelf-sort-arrow" aria-hidden="true"
                             >&#8597;</span
                           >
@@ -201,6 +256,15 @@
                 </div>
 
                 <div class="mb-3">
+                  <label for="category-input" class="form-label">Category</label>
+                  <select
+                    class="form-select"
+                    id="category-input"
+                    name="category"
+                  ></select>
+                </div>
+
+                <div class="mb-3">
                   <label for="store-date-input" class="form-label">
                     Stored On
                   </label>
@@ -269,6 +333,7 @@
         </div>
       </div>
     </main>
-    <script src="js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
   </body>
 </html>

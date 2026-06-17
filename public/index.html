@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Forum&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Forum&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <script
@@ -24,12 +24,14 @@
     ></script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+    <nav class="navbar navbar-expand-lg sl-navbar">
       <div class="container">
         <a class="navbar-brand text-start" href="/index.html">ShelfLife</a>
         <div class="d-flex gap-2 ms-auto">
           <a class="btn btn-outline-light btn-sm" href="/index.html">Pantry</a>
-          <a class="btn btn-outline-light btn-sm" href="/recipes.html">Recipes</a>
+          <a class="btn btn-outline-light btn-sm" href="/recipes.html"
+            >Recipes</a
+          >
         </div>
       </div>
     </nav>
@@ -46,7 +48,10 @@
 
               <div class="shelf-toolbar mb-3">
                 <div class="shelf-search-wrap">
-                  <label for="shelf-search-input" class="form-label visually-hidden">
+                  <label
+                    for="shelf-search-input"
+                    class="form-label visually-hidden"
+                  >
                     Search shelf
                   </label>
                   <input
@@ -57,62 +62,121 @@
                     autocomplete="off"
                   />
                 </div>
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary btn-sm"
-                  id="shelf-clear-filters-btn">
-                  Clear search
-                </button>
+                <div class="shelf-toolbar-actions">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    id="shelf-clear-search-btn"
+                  >
+                    Clear search
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    id="shelf-clear-filters-btn"
+                  >
+                    Clear filters
+                  </button>
+                </div>
               </div>
 
               <p
                 class="shelf-results-note text-muted small mb-2"
                 id="shelf-results-note"
-                aria-live="polite"></p>
+                aria-live="polite"
+              ></p>
 
               <div class="table-responsive">
-              <table class="table" id="shelf-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>
-                      <button type="button" class="shelf-sort-btn" data-sort="priority" aria-label="Sort by priority">
-                        Priority <span class="shelf-sort-arrow" aria-hidden="true">&#8597;</span>
-                      </button>
-                    </th>
-                    <th>
-                      <button type="button" class="shelf-sort-btn" data-sort="food" aria-label="Sort by food">
-                        Food <span class="shelf-sort-arrow" aria-hidden="true">&#8597;</span>
-                      </button>
-                    </th>
-                    <th>
-                      <button type="button" class="shelf-sort-btn" data-sort="quantity" aria-label="Sort by quantity">
-                        Quantity <span class="shelf-sort-arrow" aria-hidden="true">&#8597;</span>
-                      </button>
-                    </th>
-                    <th>
-                      <button type="button" class="shelf-sort-btn" data-sort="cost" aria-label="Sort by cost">
-                        Cost <span class="shelf-sort-arrow" aria-hidden="true">&#8597;</span>
-                      </button>
-                    </th>
-                    <th>
-                      <button type="button" class="shelf-sort-btn" data-sort="expirationDate" aria-label="Sort by expiration date">
-                        Expiration Date <span class="shelf-sort-arrow" aria-hidden="true">&#8597;</span>
-                      </button>
-                    </th>
-                    <th>
-                      <button type="button" class="shelf-sort-btn" data-sort="storedDate" aria-label="Sort by stored date">
-                        Stored On <span class="shelf-sort-arrow" aria-hidden="true">&#8597;</span>
-                      </button>
-                    </th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
+                <table class="table" id="shelf-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>
+                        <button
+                          type="button"
+                          class="shelf-sort-btn"
+                          data-sort="priority"
+                          aria-label="Sort by priority"
+                        >
+                          Priority
+                          <span class="shelf-sort-arrow" aria-hidden="true"
+                            >&#8597;</span
+                          >
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="shelf-sort-btn"
+                          data-sort="food"
+                          aria-label="Sort by food"
+                        >
+                          Food
+                          <span class="shelf-sort-arrow" aria-hidden="true"
+                            >&#8597;</span
+                          >
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="shelf-sort-btn"
+                          data-sort="quantity"
+                          aria-label="Sort by quantity"
+                        >
+                          Quantity
+                          <span class="shelf-sort-arrow" aria-hidden="true"
+                            >&#8597;</span
+                          >
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="shelf-sort-btn"
+                          data-sort="cost"
+                          aria-label="Sort by cost"
+                        >
+                          Cost
+                          <span class="shelf-sort-arrow" aria-hidden="true"
+                            >&#8597;</span
+                          >
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="shelf-sort-btn"
+                          data-sort="storedDate"
+                          aria-label="Sort by stored date"
+                        >
+                          Stored On
+                          <span class="shelf-sort-arrow" aria-hidden="true"
+                            >&#8597;</span
+                          >
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="shelf-sort-btn"
+                          data-sort="expirationDate"
+                          aria-label="Sort by expiration date"
+                        >
+                          Expiration Date
+                          <span class="shelf-sort-arrow" aria-hidden="true"
+                            >&#8597;</span
+                          >
+                        </button>
+                      </th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
 
-                <tbody id="shelf-table-body">
-                  <tr></tr>
-                </tbody>
-              </table>
+                  <tbody id="shelf-table-body">
+                    <tr></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -120,26 +184,7 @@
 
         <!-- Bottom Two Panels -->
         <div class="row mt-4">
-          <div class="col-md-6">
-            <div class="shopping-list">
-              <h2>Smart Shopping Suggestions</h2>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Ingredient</th>
-                    <th>Why</th>
-                  </tr>
-                </thead>
-
-                <tbody id="shopping-list-table">
-                  <tr></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="col-md-6">
+          <div class="col-md-12">
             <div class="add-item">
               <h2>Add to your Shelf:</h2>
               <form id="add-item-form">
@@ -180,7 +225,9 @@
                 </div>
 
                 <div class="mb-3">
-                  <label for="quantity-input" class="form-label">Quantity</label>
+                  <label for="quantity-input" class="form-label"
+                    >Quantity</label
+                  >
                   <div class="input-group">
                     <input
                       type="number"

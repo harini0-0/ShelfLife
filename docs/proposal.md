@@ -15,18 +15,22 @@ See [user-personas.md](user-personas.md) for the full persona breakdown.
 See [user-stories.md](user-stories.md) for the grouped user stories and use cases.
 
 ## Design Mockups
+
 ### Main Pantry Page
+
 - Top section: pantry table with food names, expiration dates, and delete actions.
 - Middle left: shopping list panel for smart ingredient suggestions.
 - Middle right: add-item form for pantry inventory.
 
 ### Recipe Page
+
 - Recipe recommendation cards with cook time and matched ingredients.
 - Recipe detail panel with ingredients, missing items, and step-by-step instructions.
 - Shopping suggestions table that shows what to buy next.
 - Meal-prep tracker with form inputs and a separate list of prepared foods.
 
 ### Simple Wireframe
+
 ```text
 ShelfLife Dashboard
 --------------------------------------------------
@@ -44,11 +48,13 @@ ShelfLife Recipes
 ```
 
 ## Core Features
+
 - Pantry management with add, update, delete, and expiration tracking.
 - Recipe recommendations based on pantry inventory.
 - Recipe detail views with ingredients and instructions.
 
 ## Technical Notes
+
 - Backend: Node.js, Express, MongoDB
 - Frontend: Vanilla JavaScript, HTML5, CSS
 - Rendering: Client-side DOM updates with fetch requests

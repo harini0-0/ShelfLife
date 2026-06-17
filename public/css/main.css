@@ -1,24 +1,136 @@
+/* Design tokens */
+:root {
+  --sl-bg: #f9f9f7;
+  --sl-surface: #ffffff;
+  --sl-border: #e4e4e0;
+  --sl-text: #18181b;
+  --sl-text-muted: #71717a;
+  --sl-accent: #18181b;
+  --sl-accent-rgb: 24, 24, 27;
+  --sl-radius: 10px;
+  --sl-shadow: 0 1px 4px rgb(0 0 0 / 6%);
+
+  /* Bootstrap primary override */
+  --bs-primary: var(--sl-accent);
+  --bs-primary-rgb: var(--sl-accent-rgb);
+  --bs-link-color: var(--sl-accent);
+  --bs-link-hover-color: #3f3f46;
+  --bs-border-color: var(--sl-border);
+  --bs-body-bg: var(--sl-bg);
+  --bs-body-color: var(--sl-text);
+  --bs-body-font-family: "Inter", system-ui, sans-serif;
+  --bs-body-font-size: 0.9375rem;
+}
+
+/* Base */
+body {
+  background-color: var(--sl-bg);
+}
+
+/* Navbar */
+.sl-navbar {
+  background-color: var(--sl-accent);
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+.sl-navbar .navbar-brand {
+  font-family: "Forum", serif;
+  font-size: 1.4rem;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+}
+
+.sl-navbar .btn-outline-light {
+  border-color: rgb(255 255 255 / 30%);
+  color: rgb(255 255 255 / 85%);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.sl-navbar .btn-outline-light:hover {
+  background-color: rgb(255 255 255 / 12%);
+  border-color: rgb(255 255 255 / 50%);
+  color: #ffffff;
+}
+
+/* Panels */
 .my-shelf,
-.shopping-list,
 .add-item,
 .my-recipes {
-  background-color: rgb(255, 255, 255);
-  border-radius: 12px;
-  border-style: solid;
-  border-color: rgb(114, 142, 167);
+  background-color: var(--sl-surface);
+  border-radius: var(--sl-radius);
+  border: 1px solid var(--sl-border);
   padding: 1.5rem;
   min-height: 300px;
-  box-shadow: 0 2px 10px rgb(0 0 0 / 10%);
+  box-shadow: var(--sl-shadow);
 }
 
 .my-shelf {
   min-height: 400px;
 }
 
-.shelf-priority-note {
-  font-size: 0.95rem;
+.add-item,
+.my-recipes {
+  min-height: 250px;
 }
 
+/* Headings inside panels */
+.my-shelf h3,
+.add-item h2,
+.my-recipes h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--sl-text);
+  margin-bottom: 0.25rem;
+}
+
+/* Table */
+.my-shelf .table {
+  font-size: 0.875rem;
+  color: var(--sl-text);
+}
+
+.my-shelf .table thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sl-text-muted);
+  border-bottom: 1px solid var(--sl-border);
+  padding-bottom: 0.6rem;
+}
+
+.my-shelf .table tbody tr {
+  border-bottom: 1px solid var(--sl-border);
+}
+
+.my-shelf .table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.my-shelf .table tbody td {
+  vertical-align: middle;
+  padding: 0.6rem 0.5rem;
+}
+
+/* Expiry row states.
+   Bootstrap paints background-color on each cell via --bs-table-bg, which
+   covers any background set on the <tr>. Override the variable instead so
+   the cells themselves pick up the expiry color. */
+.my-shelf .table tbody tr.shelf-row-good {
+  --bs-table-bg: #f0fdf4;
+}
+
+.my-shelf .table tbody tr.shelf-row-urgent {
+  --bs-table-bg: #fffbeb;
+}
+
+.my-shelf .table tbody tr.shelf-row-expired {
+  --bs-table-bg: #fff1f2;
+}
+
+/* Shelf toolbar */
 .shelf-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -30,6 +142,22 @@
   flex: 1 1 16rem;
 }
 
+.shelf-toolbar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.shelf-priority-note {
+  font-size: 0.875rem;
+}
+
+.shelf-results-note {
+  min-height: 1.25rem;
+  font-size: 0.8125rem;
+}
+
+/* Sort buttons */
 .shelf-sort-btn {
   background: none;
   border: none;
@@ -45,13 +173,14 @@
 
 .shelf-sort-btn:hover,
 .shelf-sort-btn:focus-visible {
-  color: rgb(13, 110, 253);
+  color: var(--sl-text);
+  opacity: 0.7;
   outline: none;
 }
 
 .shelf-sort-arrow {
-  font-size: 0.85em;
-  opacity: 0.45;
+  font-size: 0.8em;
+  opacity: 0.35;
 }
 
 .shelf-sort-btn.is-active .shelf-sort-arrow,
@@ -60,18 +189,7 @@
   opacity: 1;
 }
 
-.shelf-results-note {
-  min-height: 1.25rem;
-}
-
-.my-shelf .table tbody tr.shelf-row-urgent {
-  background-color: rgb(255 243 205 / 55%);
-}
-
-.my-shelf .table tbody tr.shelf-row-expired {
-  background-color: rgb(248 215 218 / 70%);
-}
-
+/* Inline editing */
 .my-shelf .inline-edit-name,
 .my-shelf .inline-edit-expiration,
 .my-shelf .inline-edit-stored {
@@ -97,8 +215,71 @@
   min-width: 6.5rem;
 }
 
-.shopping-list,
-.add-item,
-.my-recipes {
-  min-height: 250px;
+/* Buttons */
+.btn-primary {
+  --bs-btn-bg: var(--sl-accent);
+  --bs-btn-border-color: var(--sl-accent);
+  --bs-btn-hover-bg: #3f3f46;
+  --bs-btn-hover-border-color: #3f3f46;
+  --bs-btn-active-bg: #52525b;
+  --bs-btn-color: #ffffff;
+  font-weight: 500;
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--sl-text-muted);
+  --bs-btn-border-color: var(--sl-border);
+  --bs-btn-hover-bg: var(--sl-bg);
+  --bs-btn-hover-border-color: #a1a1aa;
+  --bs-btn-hover-color: var(--sl-text);
+  font-weight: 500;
+}
+
+.btn-warning {
+  --bs-btn-bg: #f4f4f5;
+  --bs-btn-border-color: var(--sl-border);
+  --bs-btn-color: var(--sl-text);
+  --bs-btn-hover-bg: #e4e4e7;
+  --bs-btn-hover-border-color: #d4d4d8;
+  --bs-btn-hover-color: var(--sl-text);
+  font-weight: 500;
+}
+
+.btn-danger {
+  --bs-btn-bg: #fef2f2;
+  --bs-btn-border-color: #fecaca;
+  --bs-btn-color: #dc2626;
+  --bs-btn-hover-bg: #fee2e2;
+  --bs-btn-hover-border-color: #fca5a5;
+  --bs-btn-hover-color: #b91c1c;
+  font-weight: 500;
+}
+
+.btn-success {
+  --bs-btn-bg: #f0fdf4;
+  --bs-btn-border-color: #bbf7d0;
+  --bs-btn-color: #16a34a;
+  --bs-btn-hover-bg: #dcfce7;
+  --bs-btn-hover-border-color: #86efac;
+  --bs-btn-hover-color: #15803d;
+  font-weight: 500;
+}
+
+/* Form controls */
+.form-control,
+.form-select {
+  border-color: var(--sl-border);
+  font-size: 0.9rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #a1a1aa;
+  box-shadow: 0 0 0 3px rgb(24 24 27 / 8%);
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sl-text);
 }

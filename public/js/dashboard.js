@@ -85,11 +85,11 @@ function renderQuantityUnitOptions(selectedUnit = DEFAULT_QUANTITY_UNIT) {
               }>
                 ${unit.label}
               </option>
-            `,
+            `
           )
           .join("")}
       </optgroup>
-    `,
+    `
   ).join("");
 }
 
@@ -110,9 +110,9 @@ function getDaysUntilExpiration(expirationDate) {
   }
 
   const today = new Date();
-  const target = new Date(expirationDate);
   today.setHours(0, 0, 0, 0);
-  target.setHours(0, 0, 0, 0);
+  const [year, month, day] = expirationDate.split("-").map(Number);
+  const target = new Date(year, month - 1, day);
 
   return Math.round((target - today) / (1000 * 60 * 60 * 24));
 }
@@ -160,15 +160,19 @@ function formatCostLostPerDay(food) {
 function getShelfRowClass(food) {
   const daysLeft = getDaysUntilExpiration(food.expirationDate);
 
-  if (daysLeft !== null && daysLeft < 0) {
+  if (daysLeft === null) {
+    return "";
+  }
+
+  if (daysLeft < 0) {
     return "shelf-row-expired";
   }
 
-  if (daysLeft !== null && daysLeft <= 3) {
+  if (daysLeft <= 7) {
     return "shelf-row-urgent";
   }
 
-  return "";
+  return "shelf-row-good";
 }
 
 function sortShelfByPriority(items) {
@@ -201,7 +205,9 @@ function getShelfSortValue(food, column) {
     case "food":
       return (food.name || "").toLowerCase();
     case "quantity":
-      return food.quantity === null || food.quantity === undefined || food.quantity === ""
+      return food.quantity === null ||
+        food.quantity === undefined ||
+        food.quantity === ""
         ? null
         : Number(food.quantity);
     case "cost":
@@ -236,8 +242,8 @@ function applyShelfSort(items) {
     compareSortValues(
       getShelfSortValue(a, shelfSort.column),
       getShelfSortValue(b, shelfSort.column),
-      shelfSort.direction,
-    ),
+      shelfSort.direction
+    )
   );
 }
 
@@ -273,7 +279,9 @@ function toggleShelfSort(column) {
 }
 
 function normalizeFilterText(value) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 function getShelfSearchText(food) {
@@ -354,12 +362,23 @@ function renderShelfTable() {
     .join("");
 }
 
+function clearShelfSearch() {
+  const searchInput = document.getElementById("shelf-search-input");
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+  renderShelfTable();
+}
+
 function clearShelfFilters() {
   const searchInput = document.getElementById("shelf-search-input");
   if (searchInput) {
     searchInput.value = "";
   }
 
+  shelfSort = { column: null, direction: null };
+  updateShelfSortIndicators();
   renderShelfTable();
 }
 
@@ -394,7 +413,14 @@ function parseCostValue(value) {
   return Number.isNaN(cost) ? null : cost;
 }
 
-function getShelfItemPayload({ name, storedDate, expirationDate, quantity, quantityUnit, cost }) {
+function getShelfItemPayload({
+  name,
+  storedDate,
+  expirationDate,
+  quantity,
+  quantityUnit,
+  cost,
+}) {
   return {
     name,
     storedDate,
@@ -461,15 +487,15 @@ function renderShelfRow(food, index) {
         <td>
           <input
             type="date"
-            class="form-control form-control-sm inline-edit-expiration"
-            value="${food.expirationDate || ""}"
+            class="form-control form-control-sm inline-edit-stored"
+            value="${food.storedDate || ""}"
           />
         </td>
         <td>
           <input
             type="date"
-            class="form-control form-control-sm inline-edit-stored"
-            value="${food.storedDate || ""}"
+            class="form-control form-control-sm inline-edit-expiration"
+            value="${food.expirationDate || ""}"
           />
         </td>
         <td>
@@ -495,8 +521,8 @@ function renderShelfRow(food, index) {
       <td>${escapeHtml(food.name)}</td>
       <td>${formatQuantity(food)}</td>
       <td>${formatCost(food.cost)}</td>
-      <td>${food.expirationDate || ""}</td>
       <td>${food.storedDate || ""}</td>
+      <td>${food.expirationDate || ""}</td>
       <td>
         <button
           class="btn btn-warning btn-sm edit-btn"
@@ -548,7 +574,7 @@ async function loadPreppedMeals() {
             <td>${food.name}</td>
             <td>${food.expirationDate}</td>
             </tr>
-        `,
+        `
       )
       .join("");
   } catch (error) {
@@ -556,31 +582,10 @@ async function loadPreppedMeals() {
   }
 }
 
-async function loadShoppingList() {
-  try {
-    const response = await fetch("/data/shoppinglist.json");
-    const shoppingList = await response.json();
-    const tableBody = document.getElementById("shopping-list-table");
-
-    tableBody.innerHTML = shoppingList
-      .map(
-        (list, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${list.item}</td>
-            <td>${list.quantity}</td>
-            </tr>
-        `,
-      )
-      .join("");
-  } catch (error) {
-    console.error("Failed to load shopping list:", error);
-  }
-}
-
 const addItemForm = document.getElementById("add-item-form");
 const quantityUnitInput = document.getElementById("quantity-unit-input");
 const shelfSearchInput = document.getElementById("shelf-search-input");
+const shelfClearSearchBtn = document.getElementById("shelf-clear-search-btn");
 const shelfClearFiltersBtn = document.getElementById("shelf-clear-filters-btn");
 
 quantityUnitInput.innerHTML = renderQuantityUnitOptions();
@@ -589,6 +594,7 @@ shelfSearchInput.addEventListener("input", renderShelfTable);
 document.querySelectorAll(".shelf-sort-btn").forEach((btn) => {
   btn.addEventListener("click", () => toggleShelfSort(btn.dataset.sort));
 });
+shelfClearSearchBtn.addEventListener("click", clearShelfSearch);
 shelfClearFiltersBtn.addEventListener("click", clearShelfFilters);
 
 document.addEventListener("click", async (event) => {
@@ -688,4 +694,3 @@ addItemForm.addEventListener("submit", async (event) => {
 });
 
 loadShelfData();
-loadShoppingList();

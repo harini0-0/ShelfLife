@@ -17,7 +17,7 @@ async function loadRecipeRecommendations() {
             View Details
           </button>
         </div>
-        `,
+        `
           )
           .join("")
       : '<div class="text-muted">Add more pantry items to get recipe recommendations.</div>';
@@ -52,9 +52,13 @@ async function loadRecipeDetail(recipeId) {
         
         <h5>Still needed:</h5>
         <ul>
-          ${recipe.missingIngredients.length
-            ? recipe.missingIngredients.map((ingredient) => `<li>${ingredient}</li>`).join("")
-            : '<li class="text-muted">Nothing missing.</li>'}
+          ${
+            recipe.missingIngredients.length
+              ? recipe.missingIngredients
+                  .map((ingredient) => `<li>${ingredient}</li>`)
+                  .join("")
+              : '<li class="text-muted">Nothing missing.</li>'
+          }
         </ul>
         
         <h5>Instructions:</h5>
@@ -83,7 +87,7 @@ async function loadShoppingSuggestions() {
           <td>${suggestion.item}</td>
           <td>${suggestion.reason}</td>
         </tr>
-        `,
+        `
           )
           .join("")
       : '<tr><td colspan="3" class="text-muted">No shopping suggestions yet.</td></tr>';
@@ -112,7 +116,7 @@ async function loadMealPrep() {
             </button>
           </td>
         </tr>
-        `,
+        `
           )
           .join("")
       : '<tr><td colspan="4" class="text-muted">No meal-prepped foods tracked yet.</td></tr>';

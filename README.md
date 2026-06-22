@@ -10,6 +10,10 @@ James Hicks and Alexandra Descoteaux
 
 [Web Development — Online, Summer 2026 (Prof. John Guerra)](https://johnguerra.co/classes/webDevelopment_online_summer_2026/)
 
+## Project Objective
+
+Help users track pantry items, monitor expiration dates, get recipe ideas from ingredients they already own, and keep meal-prepped food organized so less food is wasted.
+
 ## Screenshots
 
 ### Pantry dashboard — inventory
@@ -42,9 +46,7 @@ James Hicks and Alexandra Descoteaux
    npm install
    ```
 2. Create a `.env` file in the project root (it is git-ignored):
-   ```
-   MONGODB_URI=mongodb://localhost:27017/shelflife
-   ```
+
 3. Seed the database with sample pantry items, recipes, and ingredients:
    ```bash
    npm run seed
@@ -56,13 +58,11 @@ James Hicks and Alexandra Descoteaux
 5. Open `http://localhost:3000` in your browser.
 
 To run with auto-restart on file changes:
-
 ```bash
 npm run start:nodemon
 ```
 
 To refresh the recipe/ingredient dataset from TheMealDB (not required — data is committed):
-
 ```bash
 npm run fetch:dataset
 npm run seed
@@ -105,7 +105,6 @@ The **Smart Shopping List** (bottom-left of the Recipes page) suggests ingredien
 ### Viewing Waste and Savings Insights
 
 The **Insights** tab on the Pantry page shows charts summarizing your history:
-
 - Total value saved vs. wasted.
 - Item counts broken down by outcome.
 - Waste rate and value at risk per food category.
@@ -128,38 +127,38 @@ All endpoints are prefixed by their route base.
 
 ### Shelf — `/api/shelf`
 
-| Method   | Path             | Description                            |
-| -------- | ---------------- | -------------------------------------- |
-| `GET`    | `/api/shelf`     | Return all shelf items                 |
-| `POST`   | `/api/shelf`     | Add a new shelf item                   |
-| `PUT`    | `/api/shelf/:id` | Update a shelf item by MongoDB `_id`   |
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/shelf` | Return all shelf items |
+| `POST` | `/api/shelf` | Add a new shelf item |
+| `PUT` | `/api/shelf/:id` | Update a shelf item by MongoDB `_id` |
 | `DELETE` | `/api/shelf/:id` | Remove an item and write it to history |
 
 **Shelf item fields:** `name`, `storedDate`, `expirationDate`, `quantity`, `quantityUnit`, `cost`, `category`
 
 ### Recipes — `/api/recipes`
 
-| Method   | Path                                | Description                               |
-| -------- | ----------------------------------- | ----------------------------------------- |
-| `GET`    | `/api/recipes`                      | Paginated, ranked recipe list             |
-| `POST`   | `/api/recipes`                      | Create a custom recipe                    |
-| `GET`    | `/api/recipes/tags`                 | All distinct recipe tags                  |
-| `GET`    | `/api/recipes/ingredients`          | Ingredient names for autocomplete         |
-| `GET`    | `/api/recipes/shopping-suggestions` | Suggested items to buy                    |
-| `GET`    | `/api/recipes/meal-prep`            | All logged meal-prep items                |
-| `POST`   | `/api/recipes/meal-prep`            | Log a new meal-prep item                  |
-| `DELETE` | `/api/recipes/meal-prep/:id`        | Remove a meal-prep item                   |
-| `GET`    | `/api/recipes/:id`                  | Full recipe detail with pantry match data |
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/recipes` | Paginated, ranked recipe list |
+| `POST` | `/api/recipes` | Create a custom recipe |
+| `GET` | `/api/recipes/tags` | All distinct recipe tags |
+| `GET` | `/api/recipes/ingredients` | Ingredient names for autocomplete |
+| `GET` | `/api/recipes/shopping-suggestions` | Suggested items to buy |
+| `GET` | `/api/recipes/meal-prep` | All logged meal-prep items |
+| `POST` | `/api/recipes/meal-prep` | Log a new meal-prep item |
+| `DELETE` | `/api/recipes/meal-prep/:id` | Remove a meal-prep item |
+| `GET` | `/api/recipes/:id` | Full recipe detail with pantry match data |
 
 **Recipe list query params:** `search`, `tag`, `ready` (boolean), `page`, `pageSize` (max 50)
 
 ### History — `/api/history`
 
-| Method | Path                       | Description                              |
-| ------ | -------------------------- | ---------------------------------------- |
-| `GET`  | `/api/history`             | All history records, newest first        |
-| `GET`  | `/api/history/stats`       | Aggregate saved/wasted totals and counts |
-| `GET`  | `/api/history/by-category` | Per-category waste and savings breakdown |
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/history` | All history records, newest first |
+| `GET` | `/api/history/stats` | Aggregate saved/wasted totals and counts |
+| `GET` | `/api/history/by-category` | Per-category waste and savings breakdown |
 
 ## Data Collections
 
@@ -179,17 +178,13 @@ The app reads and writes five MongoDB collections (1,000+ seeded records in tota
 
 ## Scripts
 
-| Script                  | Description                                      |
-| ----------------------- | ------------------------------------------------ |
-| `npm start`             | Start the Express server                         |
-| `npm run start:nodemon` | Start with auto-restart on changes               |
-| `npm run seed`          | Seed all MongoDB collections                     |
+| Script | Description |
+|--------|-------------|
+| `npm start` | Start the Express server |
+| `npm run start:nodemon` | Start with auto-restart on changes |
+| `npm run seed` | Seed all MongoDB collections |
 | `npm run fetch:dataset` | Refresh `database/dataset/*.json` from TheMealDB |
-| `npm run lint`          | Run ESLint                                       |
-| `npm run lint:fix`      | Run ESLint with auto-fix                         |
-| `npm run format`        | Format all files with Prettier                   |
-| `npm run validate`      | Run format check and lint together               |
-
-## Attributions
-
-- [Groceries icons created by monkik - Flaticon](https://www.flaticon.com/free-icons/groceries)
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Run ESLint with auto-fix |
+| `npm run format` | Format all files with Prettier |
+| `npm run validate` | Run format check and lint together |

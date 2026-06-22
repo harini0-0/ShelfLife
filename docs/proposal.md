@@ -1,4 +1,4 @@
-# ShelfLife Project Proposal
+# ShelfLife Project Proposal and Design Document
 
 ## Project Description
 
@@ -15,6 +15,13 @@ See [user-personas.md](user-personas.md) for the full persona breakdown.
 See [user-stories.md](user-stories.md) for the grouped user stories and use cases.
 
 ## Design Mockups
+
+### Original Mockup
+![Original Mockup](/public/assets/OriginalMockup.png)
+
+### Later Version of Index.html and Recipes.html
+
+![Final Mockup](/public/assets/Finalmockups.png)
 
 ### Main Pantry Page
 

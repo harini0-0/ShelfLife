@@ -861,7 +861,7 @@ addItemForm.addEventListener("submit", async (event) => {
     quantityUnitInput.value = DEFAULT_QUANTITY_UNIT;
     categoryInput.value = FOOD_CATEGORIES[0];
     const offcanvasEl = document.getElementById("add-item-offcanvas");
-    bootstrap.Offcanvas.getInstance(offcanvasEl)?.hide();
+    window.bootstrap.Offcanvas.getInstance(offcanvasEl)?.hide();
     await loadShelfData();
   } catch (error) {
     console.error("Failed to submit form:", error);

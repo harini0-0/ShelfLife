@@ -703,10 +703,10 @@ async function loadMealPrep() {
 
 async function populateFilters() {
   try {
-    const [tags, ingredients, listResponse] = await Promise.all([
+    const [tags, ingredients, recipeNames] = await Promise.all([
       fetch("/api/recipes/tags").then((response) => response.json()),
       fetch("/api/recipes/ingredients").then((response) => response.json()),
-      fetch("/api/recipes").then((response) => response.json()),
+      fetch("/api/recipes/names").then((response) => response.json()),
     ]);
 
     tagSelect.insertAdjacentHTML(
@@ -728,11 +728,10 @@ async function populateFilters() {
         .join("");
     }
 
-    // The meal-prep dropdown lists the most relevant recipes (the makeable,
-    // pantry-matched ones rank first)
+    // The meal-prep "from a recipe" dropdown just needs id + name.
     mealPrepRecipeSelect.insertAdjacentHTML(
       "beforeend",
-      (listResponse.recipes ?? [])
+      (recipeNames ?? [])
         .map(
           (recipe) =>
             `<option value="${escapeHtml(recipe.id)}">${escapeHtml(recipe.name)}</option>`

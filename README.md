@@ -147,6 +147,7 @@ All endpoints are prefixed by their route base.
 | -------- | ----------------------------------- | ----------------------------------------- |
 | `GET`    | `/api/recipes`                      | Paginated, ranked recipe list             |
 | `POST`   | `/api/recipes`                      | Create a custom recipe                    |
+| `GET`    | `/api/recipes/names`                | Lightweight id + name list for dropdowns  |
 | `GET`    | `/api/recipes/tags`                 | All distinct recipe tags                  |
 | `GET`    | `/api/recipes/ingredients`          | Ingredient names for autocomplete         |
 | `GET`    | `/api/recipes/shopping-suggestions` | Suggested items to buy                    |

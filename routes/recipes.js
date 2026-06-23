@@ -133,6 +133,75 @@ function namesMatch(ingredient, shelfName) {
   );
 }
 
+// Tokenize every shelf item once and index it by token. Matching a recipe
+// against a 1,000-item shelf would otherwise re-tokenize every name for every
+// ingredient of every recipe; this makes each lookup touch only the handful of
+// items that share a word with the ingredient.
+function buildShelfIndex(shelfItems) {
+  const entries = shelfItems.map((item, order) => ({
+    item,
+    order,
+    tokens: new Set(tokenize(item.name)),
+  }));
+
+  const byToken = new Map();
+  for (const entry of entries) {
+    for (const token of entry.tokens) {
+      const bucket = byToken.get(token);
+      if (bucket) {
+        bucket.push(entry);
+      } else {
+        byToken.set(token, [entry]);
+      }
+    }
+  }
+
+  return { byToken };
+}
+
+// Find the shelf item that satisfies an ingredient, using the prebuilt index.
+// Same containment rule as namesMatch; on ties, the earliest shelf item wins so
+// behavior matches the previous array-order `find`.
+function findShelfMatch(shelfIndex, ingredient) {
+  const tokens = tokenize(ingredient);
+  if (!tokens.length) {
+    return null;
+  }
+
+  const ingredientSet = new Set(tokens);
+  const seen = new Set();
+  let best = null;
+
+  for (const token of tokens) {
+    const bucket = shelfIndex.byToken.get(token);
+    if (!bucket) {
+      continue;
+    }
+    for (const entry of bucket) {
+      if (seen.has(entry.order)) {
+        continue;
+      }
+      seen.add(entry.order);
+
+      const ingredientInShelf = tokens.every((value) =>
+        entry.tokens.has(value)
+      );
+      const shelfInIngredient = [...entry.tokens].every((value) =>
+        ingredientSet.has(value)
+      );
+
+      if (
+        (ingredientInShelf || shelfInIngredient) &&
+        (!best || entry.order < best.order)
+      ) {
+        best = entry;
+      }
+    }
+  }
+
+  return best ? best.item : null;
+}
+
 function isStaple(ingredient) {
   const tokens = tokenize(ingredient);
   return (
@@ -388,7 +457,7 @@ function buildCookedHistory(shelfItem, value, consumedQuantity) {
 // Pair each non-staple ingredient with the shelf item that satisfies it (if
 // any), then derive the matched / expiring / missing breakdown and a score
 // that rewards using what you own and, especially, what's about to expire.
-function formatRecipe(recipe, shelfItems) {
+function formatRecipe(recipe, shelfIndex) {
   const considered = recipe.ingredients.filter(
     (ingredient) => !isStaple(ingredient)
   );
@@ -407,9 +476,7 @@ function formatRecipe(recipe, shelfItems) {
 
   for (const ingredient of considered) {
     const ingredientIndex = recipe.ingredients.indexOf(ingredient);
-    const shelfMatch = shelfItems.find((item) =>
-      namesMatch(ingredient, item.name)
-    );
+    const shelfMatch = findShelfMatch(shelfIndex, ingredient);
 
     if (!shelfMatch) {
       missingIngredients.push(ingredient);
@@ -572,7 +639,8 @@ async function loadFormattedRecipes() {
     shelfCollection.find({}).toArray(),
   ]);
 
-  return recipes.map((recipe) => formatRecipe(recipe, shelfItems));
+  const shelfIndex = buildShelfIndex(shelfItems);
+  return recipes.map((recipe) => formatRecipe(recipe, shelfIndex));
 }
 
 async function ensureMealPrepSeeded() {
@@ -684,12 +752,30 @@ router.post("/", async (req, res) => {
     await recipeCollection.insertOne(recipe);
 
     const shelfItems = await shelfCollection.find({}).toArray();
-    res.status(201).json(formatRecipe(recipe, shelfItems));
+    res.status(201).json(formatRecipe(recipe, buildShelfIndex(shelfItems)));
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       error: "Failed to create recipe",
+    });
+  }
+});
+
+// Lightweight id + name list for dropdowns (e.g. the meal-prep "from a recipe"
+// picker)
+router.get("/names", async (req, res) => {
+  try {
+    const recipes = await recipeCollection
+      .find({}, { projection: { _id: 0, id: 1, name: 1 } })
+      .sort({ name: 1 })
+      .toArray();
+    res.json(recipes);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Failed to fetch recipe names",
     });
   }
 });
@@ -977,7 +1063,7 @@ router.get("/:id", async (req, res) => {
     }
 
     const shelfItems = await shelfCollection.find({}).toArray();
-    res.json(formatRecipe(recipe, shelfItems));
+    res.json(formatRecipe(recipe, buildShelfIndex(shelfItems)));
   } catch (error) {
     console.error(error);
 
@@ -1032,7 +1118,7 @@ router.put("/:id", async (req, res) => {
 
     const recipe = await recipeCollection.findOne({ id: req.params.id });
     const shelfItems = await shelfCollection.find({}).toArray();
-    res.json(formatRecipe(recipe, shelfItems));
+    res.json(formatRecipe(recipe, buildShelfIndex(shelfItems)));
   } catch (error) {
     console.error(error);
 

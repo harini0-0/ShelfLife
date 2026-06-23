@@ -14,6 +14,10 @@ James Hicks and Alexandra Descoteaux
 
 Help users track pantry items, monitor expiration dates, get recipe ideas from ingredients they already own, and keep meal-prepped food organized so less food is wasted.
 
+## Deployment
+
+<https://shelflife-21gd.onrender.com/index.html>
+
 ## Screenshots
 
 ### Pantry dashboard — inventory
